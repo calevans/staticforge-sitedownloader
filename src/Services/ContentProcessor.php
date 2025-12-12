@@ -94,9 +94,17 @@ class ContentProcessor
         ];
 
         $bodyNode = null;
+        $isArchive = false;
+
         foreach ($selectors as $selector) {
-            if ($crawler->filter($selector)->count() > 0) {
-                $bodyNode = $crawler->filter($selector);
+            $nodes = $crawler->filter($selector);
+            if ($nodes->count() > 0) {
+                // If we find multiple content blocks (e.g. multiple articles or entry-content divs),
+                // this is likely an archive/index page.
+                if ($nodes->count() > 1) {
+                    $isArchive = true;
+                }
+                $bodyNode = $nodes;
                 break;
             }
         }
@@ -122,6 +130,7 @@ class ContentProcessor
         $markdown = str_replace('Comments are closed.', '', $markdown);
 
         return [
+            'is_archive' => $isArchive,
             'metadata' => [
                 'title' => $title,
                 'description' => $description,

@@ -12,6 +12,7 @@ class CrawlerService
     private Log $logger;
     private array $visited = [];
     private array $queue = [];
+    private array $seenContentHashes = [];
     private string $baseUrl;
     private string $baseHost;
 
@@ -94,6 +95,20 @@ class CrawlerService
         // We pass the crawler which now has modified DOM (assets/links rewritten)
         $result = $this->contentProcessor->process($crawler, $url);
 
+        // Check if detected as archive
+        if (!empty($result['is_archive'])) {
+            $this->logger->log('INFO', "Skipping save for detected archive page: {$url}");
+            return;
+        }
+
+        // Check Content Hash
+        $contentHash = hash('sha256', $result['content']);
+        if (isset($this->seenContentHashes[$contentHash])) {
+            $this->logger->log('INFO', "Skipping duplicate content (seen at {$this->seenContentHashes[$contentHash]}): {$url}");
+            return;
+        }
+        $this->seenContentHashes[$contentHash] = $url;
+
         if (isset($result['category_data'])) {
             foreach ($result['category_data'] as $cat) {
                 // Key by URL to avoid duplicates
@@ -109,9 +124,9 @@ class CrawlerService
             return;
         }
 
-        // Skip saving category archive pages (we generate our own)
-        if (strpos($url, '/category/') !== false) {
-            $this->logger->log('INFO', "Skipping save for category archive page: {$url}");
+        // Skip saving category/tag archive pages (we generate our own)
+        if (strpos($url, '/category/') !== false || strpos($url, '/tag/') !== false) {
+            $this->logger->log('INFO', "Skipping save for archive page: {$url}");
             return;
         }
 
