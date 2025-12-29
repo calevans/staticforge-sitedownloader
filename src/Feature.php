@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Calevans\StaticForgeSiteDownloader;
 
 use EICC\StaticForge\Core\BaseFeature;
+use EICC\StaticForge\Core\ConfigurableFeatureInterface;
 use EICC\StaticForge\Core\EventManager;
 use EICC\Utils\Container;
 use Symfony\Component\Console\Application;
@@ -13,9 +14,21 @@ use Calevans\StaticForgeSiteDownloader\Services\AssetProcessor;
 use Calevans\StaticForgeSiteDownloader\Services\ContentProcessor;
 use Calevans\StaticForgeSiteDownloader\Services\CrawlerService;
 
-class Feature extends BaseFeature
+class Feature extends BaseFeature implements ConfigurableFeatureInterface
 {
     protected string $name = 'SiteDownloader';
+
+    public function getRequiredConfig(): array
+    {
+        return [];
+    }
+
+    public function getRequiredEnv(): array
+    {
+        return [
+            'SOURCE_DIR',
+        ];
+    }
 
     public function register(EventManager $eventManager, Container $container): void
     {
