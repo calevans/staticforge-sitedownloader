@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Calevans\StaticForgeSiteDownloader\Commands;
 
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -12,10 +13,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 use EICC\Utils\Container;
 use Calevans\StaticForgeSiteDownloader\Services\CrawlerService;
 
+#[AsCommand(name: 'site:download', description: 'Download a static site and convert to Markdown.')]
 class DownloadCommand extends Command
 {
-    protected static $defaultName = 'site:download';
-    protected static $defaultDescription = 'Download a static site and convert to Markdown.';
     private Container $container;
     private CrawlerService $crawlerService;
 

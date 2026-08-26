@@ -24,18 +24,18 @@ class DownloadCommandTest extends TestCase
         $this->root = vfsStream::setup('root');
         $this->container = $this->createMock(Container::class);
         $this->crawlerService = $this->createMock(CrawlerService::class);
-        
+
         $this->command = new DownloadCommand($this->container, $this->crawlerService);
     }
 
     public function testExecuteRunsCrawl(): void
     {
         $application = new Application();
-        $application->add($this->command);
-        
+        $application->addCommand($this->command);
+
         $command = $application->find('site:download');
         $commandTester = new CommandTester($command);
-        
+
         $_ENV['SOURCE_DIR'] = vfsStream::url('root/content');
         mkdir($_ENV['SOURCE_DIR']);
 
@@ -55,11 +55,11 @@ class DownloadCommandTest extends TestCase
     public function testExecuteCleansDirectory(): void
     {
         $application = new Application();
-        $application->add($this->command);
-        
+        $application->addCommand($this->command);
+
         $command = $application->find('site:download');
         $commandTester = new CommandTester($command);
-        
+
         $sourceDir = vfsStream::url('root/content');
         $_ENV['SOURCE_DIR'] = $sourceDir;
         mkdir($sourceDir);
@@ -77,11 +77,11 @@ class DownloadCommandTest extends TestCase
     public function testExecuteSkipsCleanWhenOptionSet(): void
     {
         $application = new Application();
-        $application->add($this->command);
-        
+        $application->addCommand($this->command);
+
         $command = $application->find('site:download');
         $commandTester = new CommandTester($command);
-        
+
         $sourceDir = vfsStream::url('root/content');
         $_ENV['SOURCE_DIR'] = $sourceDir;
         mkdir($sourceDir);

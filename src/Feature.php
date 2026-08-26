@@ -6,9 +6,8 @@ namespace Calevans\StaticForgeSiteDownloader;
 
 use EICC\StaticForge\Core\BaseFeature;
 use EICC\StaticForge\Core\ConfigurableFeatureInterface;
-use EICC\StaticForge\Core\EventManager;
-use EICC\Utils\Container;
-use Symfony\Component\Console\Application;
+use EICC\StaticForge\Core\Events\ConsoleInitEvent;
+use EICC\StaticForge\Core\Events\EventListener;
 use Calevans\StaticForgeSiteDownloader\Commands\DownloadCommand;
 use Calevans\StaticForgeSiteDownloader\Services\AssetProcessor;
 use Calevans\StaticForgeSiteDownloader\Services\ContentProcessor;
@@ -30,25 +29,16 @@ class Feature extends BaseFeature implements ConfigurableFeatureInterface
         ];
     }
 
-    public function register(EventManager $eventManager, Container $container): void
+    #[EventListener('CONSOLE_INIT')]
+    public function registerCommands(ConsoleInitEvent $event): void
     {
-        parent::register($eventManager, $container);
-        $eventManager->registerListener('CONSOLE_INIT', [$this, 'registerCommands']);
-    }
-
-    public function registerCommands(Container $container, array $data): array
-    {
-        /** @var Application $application */
-        $application = $data['application'];
-
         $sourceDir = $_ENV['SOURCE_DIR'] ?? 'content';
-        $logger = $container->get('logger');
+        $logger = $this->container->get('logger');
 
         $assetProcessor = new AssetProcessor($sourceDir, $logger);
         $contentProcessor = new ContentProcessor();
         $crawlerService = new CrawlerService($logger, $assetProcessor, $contentProcessor, $sourceDir);
 
-        $application->add(new DownloadCommand($container, $crawlerService));
-        return $data;
+        $event->application->addCommand(new DownloadCommand($this->container, $crawlerService));
     }
 }
