@@ -27,6 +27,5 @@
         "staticforge": {
             "feature": "Calevans\\StaticForgeSiteDownloader\\Feature"
         }
-    },
-    "version": "3.0.0"
+    }
 }
